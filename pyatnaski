@@ -1,4 +1,4 @@
-Program p9tnashki;
+Program pyatnashki;
 Uses Crt,Graph;{Подключение библиотеки Crt и модуля Grap}
  
 var {раздел описания переменных}

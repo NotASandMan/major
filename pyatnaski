@@ -1,0 +1,382 @@
+Program p9tnashki;
+Uses Crt,Graph;{Подключение библиотеки Crt и модуля Grap}
+ 
+var {раздел описания переменных}
+   dm:array [1..4,1..4] of string;{двумерный масссив, содержит элементы табло}
+   om:array [1..16] of integer;{одномерный массив, содержит элементы табло}
+   im:array [1..10] of string;{имена лучших игроков}
+   res:array [1..10] of integer;{результаты лучших игроков}
+   imn:array [1..10] of string;{массив со вновь сформированным списком лучших игроков}
+   resn:array [1..10] of integer;{массив со вновь сформированным списком лучших результатов}
+   i,j:integer;{переменные для работы с массивами}
+   ch:char;{переменная которой присваивается код нажатой клавиши}
+   f:text;{файловая переменная}
+   stb,stk:integer;{координаты пустого элемента}
+   xod:integer;{счетчик, считывает каждый ход}
+   name:string;{имя игравшего пользователя}
+   prov:boolean;{проверка правильности расклада}
+ 
+ 
+ 
+{процедура подключения графики}
+Procedure OpenGraph;
+var
+   GraphDriver, GraphMode:integer;
+begin
+   GraphDriver:=Detect;
+   InitGraph(GraphDriver,GraphMode,'C:\BP');{инициализация графики}
+end;
+ 
+ 
+ 
+{информация об авторе}
+Procedure avtor;
+begin
+clrscr;
+   TextColor(Cyan);
+   OutTextXY(70,100,'#########################################');
+   OutTextXY(70,110,'#                                       #');
+   OutTextXY(70,120,'#              Made by                  #');
+   OutTextXY(70,130,'#                                       #');
+   OutTextXY(70,140,'#              SandMan                  #');
+   OutTextXY(70,150,'#                                       #');
+   OutTextXY(70,160,'#########################################');
+   OutTextXY(20,170,'Press any Key...');
+   ch:=readkey;
+end;
+ 
+ 
+ 
+{управление в игре}
+Procedure help;
+begin
+clrscr;
+   OutTextXY(70,30,'Menu pomoshi igrbl');
+   OutTextXY(30,45,'Dl9 perdvigeni9 cifr v igre ispolzyite strelki');
+   OutTextXY(30,55,'Dl9 vblxoda iz igrbl nagati Esc');
+   OutTextXY(70,70,'Pravila igrbl');
+   OutTextXY(30,80,'P9tnashki- popul9rna9 igra, predstavl9et soboi kvadratnoe pole 4x4,');
+   OutTextXY(30,90,'sosto0shee iz 16 9cheek 15 iz kotorblx sodergat nepovtor9ushies9');
+   OutTextXY(30,100,'cifrbl ot 1 do 15, i odny pystyu 9cheiky. Cifrbl na pole raspologenbl');
+   OutTextXY(30,110,'xaoticheski, zadacha igroka, sdelav kak mogno menshe xodov, peremeshat cifrbl');
+   OutTextXY(30,120,'po polu i rastavit ix po nomeram.');
+   OutTextXY(15,130,'Press any key...');
+   ch:=readkey;
+end;
+ 
+ 
+ 
+{Вывод на экран табло с цифрами}
+Procedure vblvod;
+var
+   x1,y1:integer;{координаты двумерного массива}
+   x,y:integer;{координаты клеток}
+   i1,j1:integer;{переменные счетчики для рисования клеток}
+   w1,h1:integer;{Ширина и высота клеток}
+begin
+   OutTextXY(210,50,'Chto bbl pokinut igry nagmite Esc');
+   w1:=30;{рисование рамки}
+   h1:=30;
+   for i1:=0 to 3 do
+   for j1:=0 to 3 do
+      begin
+         x:=235+j1*35;{сдвиг клеток по оси x}
+         y:=150+i1*35;{сдвиг клеток по оси y}
+         SetFillStyle(1,4);{цвет и стиль клеток}
+         bar(x,y,x+w1,y+h1);{рисование клетки}
+      end;
+   x1:=245;
+   y1:=162;
+{цикл вывода двумерного массива по верх клеток}
+   for i:=1 to 4 do
+      begin
+         for j:=1 to 4 do
+            begin
+               OutTextXY(x1,y1,dm[i,j]);{вывод текста на экран}
+               x1:=x1+35;
+            end;
+         x1:=245;
+         y1:=y1+35;
+      end;
+  {Рисование рамки}
+   line(220,135,220,300);
+   line(385,135,385,300);
+   line(220,135,385,135);
+   line(220,300,385,300);
+end;
+ 
+ 
+ 
+{Формирование табло, заполненное случайными числами}
+Procedure tablo;
+var
+   a:integer;{переменная которой прсваивается случайное число}
+   k,q:integer;{счетчики для операций с массивами}
+begin
+   randomize;
+   for q:=1 to 16 do
+      begin
+         a:=random(15);{выбор случайного числа}
+         k:=1;
+   {пока не будет заполнен массив случайными числами, выполнять}
+         while k<>17 do
+            begin
+               if om[k]=a then
+                  begin
+                     a:=random(17);
+                     k:=1;
+                  end
+               else k:=k+1;
+            end;
+         om[q]:=a{присвоение очередного неповторяющегося элемента массива}
+      end;
+   q:=1;
+   {заполнение двумерного массива}
+   for i:=1 to 4 do
+      begin
+         for j:=1 to 4 do
+            begin
+               case om[q] of{вместо цифр одномерного масива присваиваем сктоковые эелементы}
+              1:dm[i,j]:='1';
+              2:dm[i,j]:='2';
+              3:dm[i,j]:='3';
+              4:dm[i,j]:='4';
+              5:dm[i,j]:='5';
+              5:dm[i,j]:='6';
+              7:dm[i,j]:='7';
+              8:dm[i,j]:='8';
+              9:dm[i,j]:='9';
+              10:dm[i,j]:='10';
+              11:dm[i,j]:='11';
+              12:dm[i,j]:='12';
+              13:dm[i,j]:='13';
+              14:dm[i,j]:='14';
+              15:dm[i,j]:='15';
+              16:dm[i,j]:=' ';
+            end;
+         q:=q+1;
+      end;
+end;
+vblvod;{вывод табло на экран}
+end;
+ 
+ 
+ 
+{поиск пустого элемента}
+procedure poisk;
+begin
+   for i:=1 to 4 do
+      begin
+          for j:=1 to 4 do
+             begin
+             {цикл, равен ли текущий элемент пробелу}
+                if dm[i,j]=' ' then
+                   begin
+                      stk:=i;{то присваиваем координаты пустого элемента}
+                      stb:=j;
+                   end;
+             end;
+       end;
+end;
+ 
+ 
+ 
+{передвижение клеток с цифрами по табло}
+procedure napravlenie;
+begin
+   ch:=readkey;{переменной присваивается код нажатой клавиши}
+   if ord(ch)=75 then {Если нажата клавиша влево}
+      begin
+         if stb<>4 then {Если это не последний элемент, стоящий у границы табло}
+            begin
+               dm[stk,stb]:=dm[stk,stb+1]; {На место пустого элемента присваивается элемент стоящий справа от пустого}
+               dm[stk,stb+1]:=' '; {Элементу стоящему справа от пустого присваивается пустой элемент}
+               stb:=stb+1; {Новая координата пустого элемента}
+               xod:=xod+1; {Очередной сделанный ход}
+            end;
+      end;
+   if ord(ch)=72 then {Если нажата клавиша вверх}
+      begin
+         if stk<>4 then 
+            begin
+               dm[stk,stb]:=dm[stk+1,stb]; 
+               dm[stk+1,stb]:=' '; 
+               stk:=stk+1;
+               xod:=xod+1; 
+            end;
+       end;
+   if ord(ch)=77 then {Если нажата клавиша вправо}
+       begin
+          if stb<>1 then 
+             begin
+                dm[stk,stb]:=dm[stk,stb-1]; 
+                dm[stk,stb-1]:=' '; 
+                stb:=stb-1; 
+                xod:=xod+1; 
+             end;
+       end;
+   if ord(ch)= 80 then {Если нажата клавиша вниз}
+      begin
+         if stk<>1 then {Если это не последний элемент, стоящий у границы табло}
+            begin
+               dm[stk,stb]:=dm[stk-1,stb];{На место пустого элемента присваивается элемент стоящий сверху от пустого}
+               dm[stk-1,stb]:=' '; {Элементу стоящему сверху от пустого присваивается пустой элемент}
+               stk:=stk-1; {Новая координата пустого элемента}
+               xod:=xod+1; {Очередной сделанный ход}
+            end;
+      end;
+    Vblvod;
+end;           
+ 
+ 
+ 
+{Добавляет в файл информацию о лучших результатах}
+procedure readFile;
+begin
+   assign(f,'res.txt'); {Объявления файла}
+   reset(f); {Открытие файла}
+   j:=1;
+   for i:=1 to 10 do
+      begin
+         readln(f,im[i]); {Занесение имен лучших игроков из файла в массив}
+         readln(f,res[j]); {Занесение результатов лучших игроков в массив}
+         j:=j+1; {Счетчик для лучших результатов}
+      end;
+   close(f);
+end;
+ 
+ 
+ 
+{Считывает файл с лучшими результатами}
+procedure writeFile;
+begin
+   assign(f,'res.txt');{Объявление файла}
+   rewrite(f);{Открытие в режиме перезаписи}
+   for i:=1 to 10 do
+      begin
+         writeln(f,imn[i]);{Внесение информации о лучших игроках и их результатах из массивов в файл}
+         writeln(f,resn[i]);  
+      end;
+   close(f);
+end;
+ 
+ 
+ 
+{Процедура в которой устанавливается занял ли игрок какое либо место} 
+procedure Mesto;
+var chetchik:integer;{Счетчик, объявляет что информация о лучим игроке уже внесена, повторной информации не должно быть}
+begin
+   if prov = true then {Если игрок разложил расклад}
+      begin
+         readfile; {Процедура считывание информации из файла с лучшими результатами}
+         chetchik:=0;
+         j:=1;
+         for i:=1 to 10 do
+            begin
+               if (xod<=res[i]) and (xod>=res[i-1]) and (chetchik<1) then
+                  begin
+             {Ввод имени игрока}
+                     OutTextXY(132,325,'will Enter name and press Enter:');
+                     line(400,338,530,338);
+                     GoToXY(52,21);
+                     read(name);
+               {Присвоение очередному элементу данных текущего игрока}
+                     resn[i]:=xod;
+                     imn[i]:=name;
+                     j:=j+1;
+                     chetchik:=1;
+                  end;
+          {Перенос из одного массива в другой}
+               if j<=10 then
+                  begin
+                     resn[j]:=res[i];
+                     imn[j]:=im[i];
+                     j:=j+1;
+                  end;
+            end;
+      writeFile; {Сохранение информации в файл}
+      OutTextXY(230,360,'For leaving press ENTER');
+      readln;
+   end;
+end;
+ 
+ 
+ 
+{Проверка правильно ли разложено табло}
+procedure proverka;
+begin
+   prov:=false;
+   if  (dm[1,1]='1 ') and (dm[1,2]='2 ') and (dm[1,3]='3 ') and (dm[1,4]='4 ')
+   and (dm[2,1]='5 ') and (dm[2,2]='6 ') and (dm[2,3]='7 ') and (dm[2,4]='8 ')
+   and (dm[3,1]='9 ') and (dm[3,2]='10') and (dm[3,3]='11') and (dm[3,4]='12')
+   and (dm[4,1]='13') and (dm[4,2]='14') and (dm[4,3]='15') and (dm[4,4]='  ')
+   then
+      begin
+         prov:=true; {Если табло разложено верно, то ИСТИНА}
+         OutTextXY(230,100,'Congratulate You have won');
+         Mesto; {Процедура, устанавливающая на каком месте текущий пользователь}
+      end;
+end;
+ 
+ 
+ 
+{Переход в режим игры}
+procedure Game;
+begin
+   xod:=0;
+   OpenGraph;{инициализация графики}
+   tablo;{формирование табло}
+   poisk;{поиск пустого элемента}
+{цикл, пока не будет нажата клавиша Esc или пока игрок не победил играть}
+   repeat
+   napravlenie;{перемещение клеток}
+   until (ord(ch)=27) or (prov=true);
+   closeGraph;{закрытие графики}
+end;
+ 
+ 
+{Отображение лучших игроков}
+procedure result;
+begin
+   clrscr;
+   GoToXY(26,5);
+   writeln('Best players');
+   assign(f,'res.txt');
+   reset(f);
+   readfile; {Считывание информации из файла лучших результатов}
+{Вывод на экран в строгом порядке имена и результаты лучших игроков}
+   GoToXY(26,8); write('Move Name');
+   GoToXY(26,10); write(res[1]);
+     GoToXY(36,10); writeln(im[1]);
+   GoToXY(26,11); write(res[2]);
+     GoToXY(36,11);writeln(im[2]);
+   GoToXY(26,12); write(res[3]);
+     GoToXY(36,12);writeln(im[3]);
+   GoToXY(26,13); write(res[4]);
+     GoToXY(36,13);writeln(im[4]);
+   GoToXY(26,14); write(res[5]);
+     GoToXY(36,14);writeln(im[5]);
+   GoToXY(26,15); write(res[6]);
+     GoToXY(36,15);writeln(im[6]);
+   GoToXY(26,16); write(res[7]);
+     GoToXY(36,16);writeln(im[7]);
+   GoToXY(26,17); write(res[8]);
+     GoToXY(36,17);writeln(im[8]);
+   GoToXY(26,18); write(res[9]);
+     GoToXY(36,18);writeln(im[9]);
+   GoToXY(26,19); write(res[10]);
+     GoToXY(36,19);;writeln(im[10]);
+   GoToXY(26,23);writeln('Press any key');
+   readln;
+   ch:=readkey;
+end;
+ 
+{Основная программа}
+begin
+OpenGraph;
+avtor;
+help;
+result;
+Game;
+result;
+end.
